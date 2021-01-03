@@ -1,0 +1,24 @@
+set under system variables to D:\kafka_2.12-2.5.0\bin\windows
+before, create data/kafka and data/zookeper folders and revert the slahses
+change configuration file set dataDir to D:\kafka_2.12-2.5.0\data\zookeeper
+start zookeper: zookerper-server-start.bat config/zookeeper.properties in  D:\kafka_2.12-2.5.0
+
+edit server.properties set dataDir: D:\kafka_2.12-2.5.0\data\kafka
+start kafka: kafka-server-start.bat config/server.properties
+
+list topic: .\bin\windows\kafka-topics --zookeeper 127.0.0.1:2181 --list
+describe a topic: kafka-topics --zookeeper 127.0.0.1:2181 --topic test_topic_1 --describe
+create topic: .\bin\windows\kafka-topics --zookeeper 127.0.0.1:2181 --topic Transform_Topic --create --partitions 3 --replication-factor 1
+delete topic: kafka-topics --zookeeper 127.0.0.1:2181 --topic transformed_invoice --delete
+
+start producer: kafka-console-producer --broker-list 127.0.0.1:9092 --topic test_output_filtered_2
+
+start consumer: kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --topic test_topic_3 --from-beginning
+
+start consumer in group:  kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --topic test_output_second_filtered_2 --group my-app-group
+
+
+cassandra:
+create keyspace employee_keyspace with replication = {'class':'SimpleStrategy','replication_factor':'1'} AND durable_writes = 'true';
+describe keyspaces
+use employee_keyspaces
