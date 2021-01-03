@@ -5,6 +5,7 @@ import com.datastax.driver.core.PlainTextAuthProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.cassandra.config.SchemaAction;
 
+
 public class CassandraConfig
 //        extends AbstractCassandraConfiguration
 {
