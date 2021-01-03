@@ -8,6 +8,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
+
 public class LoginCsvConsumer1 {
     public static void main(String[] args) {
         String bootstrapServers = "127.0.0.1:9092";

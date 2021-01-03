@@ -1,12 +1,17 @@
 package com.visualizer.main.producer;
+
 import com.opencsv.CSVReader;
 import com.visualizer.main.model.LoginHistoryModel;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
+
 import java.io.FileReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
 public class LoginHistory_Producer {
     public static void main(String[] args) throws Exception {
         System.out.println(readAll());
