@@ -1,0 +1,167 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.20 of 2017/10/04
+\documentclass{article}
+\usepackage{graphicx}
+% \setcounter{secnumdepth}{3}
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\usepackage{babel}
+\usepackage{blindtext}
+\begin{document}
+\title{Churn Prediction in Financial Data}
+\date{}
+\author{{Faizan Shakeel \and
+Ayshan Yariyeva \and
+Shyam Vandan Mishra}}
+%\institute{Elte}
+%\institute {Faculty of Informatics,Department of Data Science and Engineering, Eötvös Lránd
+%University, Pázmány Péter sétány 1117, Budapest, Hungary}
+%
+
+\maketitle            
+\section{Introduction}
+
+Churn prediction is one of the most popular Big Data use cases in business. It consists of detecting customers who are likely to cancel a subscription to a service and who will continue. 
+\subsection{Data sets}
+There are three data sets that we have used in  the project.
+\subsubsection{Transfer History}
+This data set has the records of the customers who did the transfers of money in HUF currency. The data set contains 307402 rows of data and 5 columns.
+
+\begin{itemize}
+    \item TRANSFER\_ID - Unique id for each transfer.
+    \item PARTY\_ID - Unique id for each customer.     
+    \item CURRENCY - The currency in which the transfers were held.
+    \item AMOUNT - Transfer amount.
+    \item VALUE\_DATE - Date of the transfer.
+\end{itemize}
+\subsubsection{Login History}
+The data set has the records of the customers with their login time. The data set contains 586182 rows of data and 2 columns.
+\begin{itemize}
+    \item PARTY\_ID - Unique id of the each customer.
+    \item LAST\_LOGIN -  Login time and date of  the user. 
+\end{itemize}
+
+\subsubsection{INVOICE\_HISTORY}
+The data set has the records of the invoices of the customers.The data set contains 636915 rows of data and 8 columns.
+\begin{itemize}
+    \item INVOICE\_ID - Unique id of the purchase.
+    \item PARTY\_ID - Unique id of the customer.
+    \item CURRENCY - Type of currency in which the customer purchased.
+    \item TAX\_INCLUSIVE\_AMOUNT - Tax amount on the purchase.
+    \item PAYABLE\_AMOUNT - The total amount to be paid by the customer including tax.
+    \item ISSUE\_DATE - The date of issue of the invoice
+    \item TAX\_POINT\_DATE - VAT due on a particular transaction.
+    \item DUE\_DATE - Last date of the payment to deposit
+\end{itemize}
+\newpage
+\section{Overall system architecture}
+\subsection{System architecture}
+
+\begin{figure}[h!]
+   \centering
+     \includegraphics[height=15.76cm\textwidth]{Architecture.jpg}
+     \caption{This figure shows the overall architecture of the system that has been implemented in this project}
+     \label{fig:universe}
+\end{figure}
+
+\newpage
+\subsection{Jupyter Notebook Procedure}
+\subsubsection{Preprocessing of data}
+There are three data sets that were provided and to clean and preprocess the data, jupyter has been used. Initially for Login History data, time and date has to be separated for further process and observation.
+For Transfer and Invoice data set, same procedure has been followed to verify and check for the missing and unrelated values.
+\subsubsection{Counting the $PARTY\_ID$ from all the Data set}
+There are repetitive entries of logins,transfers and invoices have been mentioned in the data set. Login shows at which date and on what time login has been made from a particular Id. Transfer data shows on which date transfers have been done. Invoice data set shows the date of the generation of the invoice for a particular id and what is total payable amount, etc. All these data is from 2017 to 2020.
+Therefore, to know how many times a particular Id is mentioned in the data, counting has been done.
+
+\subsubsection{Removing the Duplicates}
+All the data set combined had more than 15,90,000 data (rows) but there were only few thousand unique $PARTY\_IDs$. Therefore, we have to remove the duplicate data from the data sets.
+
+
+\subsection{Kafka}
+\subsubsection{Why Apache Kafka?}
+We have used Apache Kafka for our experiment, because it is most popular for processing stream data, it is fast, scalable and distributed. It has characteristics of High throughput, real time etc. as mentioned in the book [1].
+
+\subsubsection{CSV data to Kafka Producer}
+To get this step right we tried many things. Initially we tried sending the data directly from python (after preprocessing) to producer but we could not succeed because of some library issue at the receiving end.\\~\\
+Next we tried using Kafka connect (Spooldir) but this also failed because all the jar files in library could not sink.
+Then we wrote a code in Java for sending CSV data row by row to Kafka producer.
+
+\subsection{Kafka Stream}
+Kafka stream is a library which is used for performing transformation on data before it is sent to data store. The stream processing takes an input from producer and performs computing and generates output [2].
+\subsection{Apache Cassandra and Tableau}
+The reason for using Cassandra as a data store is that it can handle massive data sets and highly fault tolerant. It is also a decentralized structured storage and a NoSQL database [3]. Creating tables, sending and storing is easy process.\\
+Tableau is a sophisticated data visualization and rapid analytics software[4] . It allows to use range to graphs and filters to visualize data efficiently.
+Simba an ODBC (Open Database Connectivity) driver is used to send data from Cassandra to Tableau. As it is a third party driver, some of the function in Tableau was restricted to use.
+
+\begin{figure}[h!]
+   \centering
+     \includegraphics[height=10cm\textwidth]{GraphSnapshot.png}
+     \caption{Snapshot of graphs generated in Tableau}
+     \label{fig:universe}
+\end{figure}
+
+\newpage
+\section{Experiments}
+
+\subsection{Individual Streaming of data}
+As we have been provided with three data sets, without merging we did individual transformations on the streaming data. After taking the data as row from the producer we streamed it and proceeded with transformation. 
+\subsection{Transformation on the Data sets}
+Individual transformations are being computed over different data sets.\\
+For $Login\_history$ data sets counting of unique Id has been computed to find out how many times a particular Id logged into the system in four years. This shows the interest of a Party Id in their accounts.Result for this transformation has been obtained by using GroupBy and count.\\
+The other two data sets have used almost same approach to find out churn and not churn Party IDs. For invoice history data set, a filter is used to take out important data which could be used for predicting churn.
+\subsection{Steps involved in Predicting Churn}
+The data sets were analysed clearly and useful information were extracted based on certain factors like the number of transactions done by a particular customer, number of times the customer logged into the system, the number of invoices generated for each customer. Based on the Z-score we detected the outliers and removed them(we detected the data points how far they are from the mean) Z-score for a data-point in a distribution with mean and standard deviation is given by the formula: 
+\begin{equation}
+    Z = \frac{x-\mu}{\sigma}
+\end{equation}
+where:
+\begin{itemize}
+    \item $\mu$ is the standard deviation
+    \item $\sigma$ is the mean
+\end{itemize}
+
+
+    
+
+\subsection{Merging the 3 streams}
+Merging all the streams after transformation have been tried before sending to data store. We created one consumer to consume data from all the streams and merge but during the procedure we have encountered lots of problems like data set were not compatible with each other and sometime merging only two, not all the streams.
+
+\begin{figure}[h!]
+   \centering
+     \includegraphics[height=10cm\textwidth]{Dashboard.png}
+     \caption{Dashboard Generated in Tableau}
+     \label{fig:universe}
+\end{figure}
+
+
+ \begin{thebibliography}{8}
+ \bibitem{Nishant}
+ Nishant Garg : Learning Apache Kafka - Second Edition 2nd Revised ed. Edition (2015)
+% F., Editor, S. (eds.) CONFERENCE 2016, LNCS, vol. 9999, pp. 1--13.
+% Springer, Heidelberg (2016). \doi{10.10007/1234567890}
+\bibitem{}
+Study of Apache Kafka in Big Data Stream Processing
+
+\bibitem{Cassandra}
+Avinash Lakshman, Prashant  Malik: Cassandra - A Decentralized Structured Storage System In: ACM SIGOPS Operating Systems Review(2010) 
+
+\bibitem{Cassandra}
+Murphy, Sarah Anne, "Data Visualization and Rapid Analytics: Applying Tableau Desktop to Support Library Decision-Making." Journal of Web Librarianship 7, no. 4 (2013) Decision-Making
+ \bibitem{ullah}
+% Author, F.: Article title. Journal \textbf{2}(5), 99--110 (2016)
+Ullah, H. Hussain, I. Ali and A. Liaquat, "Churn Prediction in Banking System using K-Means, LOF, and CBLOF," 2019 International Conference on Electrical, Communication, and Computer Engineering (ICECCE), Swat, Pakistan, (2019)
+
+\bibitem{ref_lncs1}
+
+Bejeck, B. (2018). Kafka Streams in Action:  Real-time apps and microser-vices with the Kafka Streams API (1st ed.). Manning Publications.
+
+ \bibitem{Artem Chebotko}
+Artem Chebotko, Andrey Kashlev, Shiyong Lu : A Big Data Modeling Methodology for Apache Cassandra. In: IEEE International Congress on Big Data (2015)
+% on Proceedings, pp. 1--2. Publisher, Location (2010)
+
+% \bibitem{ref_url1}
+% LNCS Homepage, \url{http://www.springer.com/lncs}. Last accessed 4
+% Oct 2017
+\end{thebibliography}
+\end{document}
