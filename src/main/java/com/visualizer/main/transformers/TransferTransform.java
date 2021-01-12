@@ -18,11 +18,11 @@ public class TransferTransform {
 
                 inputTopic
                        .filter((k,v)->{
-                           return Long.parseLong(v.split(",")[6]) < 20L;
+                           return Long.parseLong(v.split(",")[6]) < 51L;
                        }).to("trans_topic_result_1");
         inputTopic
                 .filter((k,v)->{
-                    return Long.parseLong(v.split(",")[6]) > 20L;
+                    return Long.parseLong(v.split(",")[6]) > 51L;
                 }).to("trans_topic_result_2");
 
 
